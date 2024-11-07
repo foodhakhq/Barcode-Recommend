@@ -1,0 +1,42 @@
+runtime: python310  # Choose the Python version that matches your app
+service: production-barcode-recommend
+instance_class: F4_1G  # Specifies the instance type (4 cores, 1 GB memory)
+
+# Use Gunicorn with Uvicorn workers and apply the gunicorn_conf.py settings
+entrypoint: gunicorn -c gunicorn_conf.py -k uvicorn.workers.UvicornWorker app:app
+
+env_variables:
+  ENV: 'production'
+
+  # API Key
+  OPENAI_API_KEY: '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'
+
+
+# OpenSearch Credentials
+  OPENSEARCH_USER: 'admin'
+  OPENSEARCH_PWD: 'Sur8=bn6Z;`QYk!?:gcj54v#fD'
+  OPENSEARCH_HOST: 'https://search-foodhak-prod-core-cevlo673wzb5jaa3dcnfalohxe.eu-west-2.es.amazonaws.com'
+
+
+# API Key
+  API_KEY: 'viJ8u142.NaQl7JEW5u8bEJpqnnRuvilTfDbHyWty'
+# Optional if VPC connector is needed
+vpc_access_connector:
+  name: projects/central-muse-388319/locations/us-central1/connectors/vpc-access-connector
+
+inbound_services:
+  - warmup  # Enable warmup requests to reduce cold start time
+
+automatic_scaling:
+  target_cpu_utilization: 0.65  # Target CPU utilization for scaling
+  min_instances: 7  # Minimum number of instances to keep running at all times (for reducing cold starts)
+  max_instances: 20  # Maximum number of instances to handle high traffic
+
+# Health check settings to monitor instance health
+health_check:
+  enable_health_check: true
+  check_interval_sec: 20  # Frequency of health checks
+  timeout_sec: 8  # Timeout for each health check request
+  healthy_threshold: 3  # Number of successful health checks required to mark the instance as healthy
+  unhealthy_threshold: 5  # Number of failed health checks before marking the instance as unhealthy
+  restart_threshold: 60  # Restart an instance if it's marked as unhealthy for 60 seconds
